@@ -1,0 +1,12 @@
+.encabezado{
+    text-align: center;
+}
+
+.mapaCDMX
+{
+    width: 580px;
+    height: 630px;
+    display : block;
+    margin-left: auto;
+    margin-right: auto;   
+}
