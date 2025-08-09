@@ -16,7 +16,7 @@
         Connection con;
         Statement stmt;
         ResultSet rs;
-        String dburl = "jdbc:postgresql://localhost:5432/ibu_proyecto";
+        String dburl = "jdbc:postgresql://localhost:5432/proyecto_ibu";
         String user = "postgres";
         String password = "";
     %>
@@ -118,35 +118,96 @@
         <input type="submit" value="ConsultarAlcaldia" name = "consultarAlcaldia">
     </form>
 
-    <%
-        /*Recuperando la información del formulario*/
-        String todasAlcaldias = request.getParameter("todasAlcaldias");
-        String abreviacionAlcaldia = request.getParameter("abreviacionAlcaldia");
-        String consultarAlcaldia = request.getParameter("consultarAlcaldia");
+<%
+    // Recuperando la información del formulario
+    String todasAlcaldias = request.getParameter("todasAlcaldias");
+    String abreviacionAlcaldia = request.getParameter("abreviacionAlcaldia");
+    String consultarAlcaldia = request.getParameter("consultarAlcaldia");
 
-        if(todasAlcaldias != null) 
-        {
-            out.println("<p>Mostrando todas las alcaldías...</p>");
-            // Aquí va la lógica para todas las alcaldías
-        }
-       else if (consultarAlcaldia != null) 
-        {
-            if (abreviacionAlcaldia != null && !abreviacionAlcaldia.trim().isEmpty()) 
-            {
-                out.println("<p>Mostrando información de la alcaldía: " + abreviacionAlcaldia + "</p>");
-                // Consulta y despliegue de la alcaldía específica
+    if (todasAlcaldias != null) {
+        String query = "SELECT * FROM alcaldia";
+        rs = stmt.executeQuery(query);
+%>
+        <h2>Listado de todas las alcaldias</h2>
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID Alcaldía</th>
+                    <th>Nombre</th>
+                    <th>Número de Habitantes</th>
+                    <th>Superficie</th>
+                    <th>Superficie AN</th>
+                    <th>Superficie ANP</th>
+                </tr>
+            </thead>
+            <tbody>
+            <%
+                while (rs.next()) {
+            %>
+                <tr>
+                    <td><%= rs.getString("idAlcaldia") %></td>
+                    <td><%= rs.getString("nombreAlcaldia") %></td>
+                    <td><%= rs.getInt("numeroHabitantes") %></td>
+                    <td><%= rs.getFloat("superficie") %></td>
+                    <td><%= rs.getFloat("superficieAN") %></td>
+                    <td><%= rs.getFloat("superficieANP") %></td>
+                </tr>
+            <%
+                }
+            %>
+            </tbody>
+        </table>
+<%
+    } else if (consultarAlcaldia != null) {
+        if (abreviacionAlcaldia != null && !abreviacionAlcaldia.trim().isEmpty()) {
+            out.println("<p>Mostrando información de la alcaldía: " + abreviacionAlcaldia + "</p>");
+            String queryAlcaldia = "SELECT * FROM alcaldia WHERE idAlcaldia = ?";
+            PreparedStatement pstmt = con.prepareStatement(queryAlcaldia);
+            pstmt.setString(1, abreviacionAlcaldia.trim());
+            ResultSet rsAlcaldia = pstmt.executeQuery();
+            if (rsAlcaldia.next()) {
+%>
+                <table border="1">
+                    <thead>
+                        <tr>
+                            <th>ID Alcaldía</th>
+                            <th>Nombre</th>
+                            <th>Número de Habitantes</th>
+                            <th>Superficie</th>
+                            <th>Superficie AN</th>
+                            <th>Superficie ANP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><%= rsAlcaldia.getString("idAlcaldia") %></td>
+                            <td><%= rsAlcaldia.getString("nombreAlcaldia") %></td>
+                            <td><%= rsAlcaldia.getInt("numeroHabitantes") %></td>
+                            <td><%= rsAlcaldia.getFloat("superficie") %></td>
+                            <td><%= rsAlcaldia.getFloat("superficieAN") %></td>
+                            <td><%= rsAlcaldia.getFloat("superficieANP") %></td>
+                        </tr>
+                    </tbody>
+                </table>
+<%
             } 
             else 
             {
-                out.println("<p style='color:red;'>Por favor ingrese una abreviación válida.</p>");
+                out.println("<p style='color:red;'>No se encontró información para la abreviación proporcionada.</p>");
             }
-        }
+            rsAlcaldia.close();
+            pstmt.close();
+        } 
         else 
         {
-            out.println("<p style='color:red;'>Seleccione una opción válida.</p>");
-        }      
-    %>
-
+            out.println("<p style='color:red;'>Por favor ingrese una abreviación</p>");
+        }
+    } 
+    else 
+    {
+        out.println("<p style='color:red;'>Seleccione una opción válida.</p>");
+    }
+%>
     <%
         if (rs != null) rs.close();
         if (stmt != null) stmt.close();
